@@ -38,3 +38,7 @@ func LoadConfiguration(file string) Config {
 
 	return config
 }
+
+func GetConfig() Config {
+	return config
+}
