@@ -6,7 +6,8 @@ import (
 	"os"
 )
 
-var config = LoadConfiguration("config.json")
+// type Config, Storing all the configurations inside this variable
+var config = LoadConfiguration("../config.json")
 
 type Config struct {
 	Token   string `json:"token"`
@@ -15,6 +16,8 @@ type Config struct {
 	SSLMode string `json:"ssl_mode"`
 }
 
+// LoadConfiguration method opens the 'config.json' file
+// and imports the server configs into the config variable.
 func LoadConfiguration(file string) Config {
 	var config Config
 
