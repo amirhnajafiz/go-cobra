@@ -1,2 +1,3 @@
-# Light-Echo
-Building application using Golang echo package.
+# Web CLI
+
+Building cli using Golang cobra package.
