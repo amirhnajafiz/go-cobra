@@ -40,6 +40,8 @@ func GenerateCertificateAuthority() {
 		return
 	}
 
+	_ = os.Mkdir("certs", 0600)
+
 	// Public key
 	certOut, err := os.Create("certs/ca.crt")
 	_ = pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: caB})
