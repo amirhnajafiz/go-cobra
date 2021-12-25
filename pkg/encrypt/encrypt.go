@@ -1,4 +1,4 @@
-package main
+package encrypt
 
 import (
 	"crypto/rand"
@@ -41,13 +41,13 @@ func GenerateCertificateAuthority() {
 	}
 
 	// Public key
-	certOut, err := os.Create("../../certs/ca.crt")
+	certOut, err := os.Create("certs/ca.crt")
 	_ = pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: caB})
 	_ = certOut.Close()
 	log.Print("written certs/cat.crt\n")
 
 	// Private key
-	keyOut, err := os.OpenFile("../../certs/ca.key", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	keyOut, err := os.OpenFile("certs/ca.key", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	_ = pem.Encode(keyOut, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(privacy)})
 	keyOut.Close()
 	log.Print("written certs/ca.key\n")
@@ -55,7 +55,7 @@ func GenerateCertificateAuthority() {
 
 func GenerateCert() {
 	// Load CA
-	calts, err := tls.LoadX509KeyPair("../../certs/ca.crt", "certs/ca.key")
+	calts, err := tls.LoadX509KeyPair("certs/ca.crt", "certs/ca.key")
 	if err != nil {
 		panic(err)
 	}
@@ -92,13 +92,13 @@ func GenerateCert() {
 	certB, err := x509.CreateCertificate(rand.Reader, cert, ca, pub, calts.PrivateKey)
 
 	// Public key
-	certOut, err := os.Create("../../certs/cert.pem")
+	certOut, err := os.Create("certs/cert.pem")
 	_ = pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: certB})
 	certOut.Close()
 	log.Print("written certs/cert.pem\n")
 
 	// Private key
-	keyOut, err := os.OpenFile("../../certs/key.pem", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	keyOut, err := os.OpenFile("certs/key.pem", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	_ = pem.Encode(keyOut, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(priv)})
 	keyOut.Close()
 	log.Print("written certs/key.pem\n")
