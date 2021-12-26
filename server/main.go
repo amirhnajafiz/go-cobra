@@ -1,25 +1,26 @@
 package server
 
 import (
-	"cmd/config"
-	"fmt"
+	"io"
+	"net/http"
+	"time"
 )
 
-func Exec() {
-	configuration := config.GetConfig()
+const (
+	htmlIndex = `<html><body>Welcome!</body></html>`
+)
 
-	// Launch HTTP server
-	go func() {
-		fmt.Println("Starting server http://localhost")
+func handleIndex(w http.ResponseWriter, _ *http.Request) {
+	_, _ = io.WriteString(w, htmlIndex)
+}
 
-		//err := httpSrv.ListenAndServe()
-		//if err != nil {
-		//	log.Fatalf("httpSrv.ListenAndServe() failed with %s", err)
-		//}
-
-	}()
-
-	// Launch HTTPS server
-	fmt.Println("Starting server https://" + configuration.Host + ":" + configuration.Port)
-	// log.Fatal(httpsSrv.ListenAndServeTLS("", ""))
+func makeServerFromMux(mux *http.ServeMux) *http.Server {
+	// set timeouts so that a slow or malicious client doesn't
+	// hold resources forever
+	return &http.Server{
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 5 * time.Second,
+		IdleTimeout:  120 * time.Second,
+		Handler:      mux,
+	}
 }
