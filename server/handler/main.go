@@ -2,6 +2,8 @@ package handler
 
 import (
 	"cmd/config"
+	"cmd/internal/handler"
+	"cmd/internal/middleware"
 	"cmd/pkg/encrypt"
 	"cmd/server"
 	"context"
@@ -10,18 +12,20 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/acme/autocert"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"os"
 	"time"
 )
 
-func HandleRequests(configuration config.Config) {
+func HandleRequests(configuration config.Config, db *gorm.DB) {
 	var httpsSrv *http.Server
 	var httpSrv *http.Server
 	var m *autocert.Manager
 
 	router := mux.NewRouter().StrictSlash(true)
+	router.HandleFunc("/tasks", middleware.CheckSecurity(configuration, handler.AllTasksHandler(db))).Methods("GET")
 
 	if configuration.SSLMode == "development" {
 		// Generate ca.crt and ca.key if not found
@@ -51,8 +55,6 @@ func HandleRequests(configuration config.Config) {
 			IdleTimeout:  120 * time.Second,
 			Handler:      router,
 		}
-
-		//  handlers.LoggingHandler(os.Stdout, router
 
 		dataDir := "certs/"
 		hostPolicy := func(ctx context.Context, host string) error {
