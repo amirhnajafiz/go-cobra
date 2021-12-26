@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"cmd/internal/middleware"
 	"cmd/internal/models"
 	"encoding/json"
 	"github.com/gorilla/mux"
@@ -9,7 +10,7 @@ import (
 	"strconv"
 )
 
-func AllTasksHandler(db *gorm.DB) func(http.ResponseWriter, *http.Request) {
+func AllTasksHandler(db *gorm.DB) middleware.HttpHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var tasks []models.Task
 

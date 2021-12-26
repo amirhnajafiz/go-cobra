@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"cmd/internal/middleware"
 	"cmd/internal/models"
 	"encoding/json"
 	"fmt"
@@ -8,7 +9,7 @@ import (
 	"net/http"
 )
 
-func NewRunHandler(db *gorm.DB) func(http.ResponseWriter, *http.Request) {
+func NewRunHandler(db *gorm.DB) middleware.HttpHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var task models.Task
 		err := json.NewDecoder(r.Body).Decode(&task)
