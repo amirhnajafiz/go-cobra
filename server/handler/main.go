@@ -3,14 +3,15 @@ package handler
 import (
 	"cmd/config"
 	"cmd/pkg/encrypt"
+	"context"
+	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
 	"os"
+	"time"
 )
 
 func HandleRequests(configuration config.Config) {
-	var httpsSrv *http.Server
-	var httpSrv *http.Server
 	var m *autocert.Manager
 
 	router := mux.NewRouter().StrictSlash(true)
@@ -24,5 +25,38 @@ func HandleRequests(configuration config.Config) {
 		defer caFile.Close()
 		// Generate cert.pem and key.pem for https://localhost
 		encrypt.GenerateCert()
+	}
+
+	if configuration.SSLMode == "production" {
+
+		// Manage Let's Encrypt SSL
+
+		// Note: use a sensible value for data directory
+		// this is where cached certificates are stored
+
+		httpsSrv = &http.Server{
+			ReadTimeout:  5 * time.Second,
+			WriteTimeout: 5 * time.Second,
+			IdleTimeout:  120 * time.Second,
+			Handler:      router,
+		}
+
+		//  handlers.LoggingHandler(os.Stdout, router
+
+		dataDir := "certs/"
+		hostPolicy := func(ctx context.Context, host string) error {
+			// Note: change to your real domain
+			allowedHost := config.Host
+			if host == allowedHost {
+				return nil
+			}
+			return fmt.Errorf("acme/autocert: only %s host is allowed", allowedHost)
+		}
+
+		m = &autocert.Manager{
+			Prompt:     autocert.AcceptTOS,
+			HostPolicy: hostPolicy,
+			Cache:      autocert.DirCache(dataDir),
+		}
 	}
 }
