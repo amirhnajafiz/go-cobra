@@ -6,14 +6,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/gorilla/mux"
+	"golang.org/x/crypto/acme/autocert"
 	"net/http"
 	"os"
 	"time"
 )
 
 func HandleRequests(configuration config.Config) {
-	var m *autocert.Manager
-
 	router := mux.NewRouter().StrictSlash(true)
 
 	if configuration.SSLMode == "development" {
@@ -34,7 +33,7 @@ func HandleRequests(configuration config.Config) {
 		// Note: use a sensible value for data directory
 		// this is where cached certificates are stored
 
-		httpsSrv = &http.Server{
+		httpsSrv := &http.Server{
 			ReadTimeout:  5 * time.Second,
 			WriteTimeout: 5 * time.Second,
 			IdleTimeout:  120 * time.Second,
@@ -46,14 +45,14 @@ func HandleRequests(configuration config.Config) {
 		dataDir := "certs/"
 		hostPolicy := func(ctx context.Context, host string) error {
 			// Note: change to your real domain
-			allowedHost := config.Host
+			allowedHost := configuration.Host
 			if host == allowedHost {
 				return nil
 			}
 			return fmt.Errorf("acme/autocert: only %s host is allowed", allowedHost)
 		}
 
-		m = &autocert.Manager{
+		_ = &autocert.Manager{
 			Prompt:     autocert.AcceptTOS,
 			HostPolicy: hostPolicy,
 			Cache:      autocert.DirCache(dataDir),
