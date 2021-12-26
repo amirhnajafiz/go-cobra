@@ -26,6 +26,8 @@ func HandleRequests(configuration config.Config, db *gorm.DB) {
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/tasks", middleware.Auth(configuration, handler.AllTasksHandler(db))).Methods("GET")
+	router.HandleFunc("/tasks/{page}", middleware.Auth(configuration, handler.AllTasksHandler(db))).Methods("GET")
+	router.HandleFunc("/run", middleware.Auth(configuration, handler.NewRunHandler(db))).Methods("POST")
 
 	if configuration.SSLMode == "development" {
 		// Generate ca.crt and ca.key if not found
