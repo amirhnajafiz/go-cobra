@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"cmd/internal/database"
 	"github.com/spf13/cobra"
+	"log"
 	"os"
 )
 
@@ -24,6 +26,9 @@ func Run() {
 	}
 
 	cmd.AddCommand(serverCmd())
+
+	db := database.Setup(true)
+	log.Println(db.Error.Error())
 
 	if err := cmd.Execute(); err != nil {
 		//fmt.Println(err)
