@@ -4,6 +4,7 @@ import (
 	"cmd/config"
 	"cmd/internal/database"
 	"cmd/server/handler"
+	"fmt"
 	"github.com/spf13/cobra"
 	"gorm.io/gorm"
 	"os"
@@ -58,7 +59,7 @@ func Exec() {
 	cmd.AddCommand(serverCmd(configuration, db))
 
 	if err := cmd.Execute(); err != nil {
-		//fmt.Println(err)
+		fmt.Println(err.Error())
 		os.Exit(0)
 	}
 }

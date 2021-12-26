@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"cmd/internal/cmd"
 )
 
 func main() {
-	fmt.Println("Lets go")
+	cmd.Exec()
 }
