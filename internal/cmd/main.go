@@ -1,34 +1,35 @@
 package cmd
 
 import (
+	"cmd/config"
 	"cmd/internal/database"
+	"cmd/server/handler"
 	"github.com/spf13/cobra"
-	"log"
+	"gorm.io/gorm"
 	"os"
 )
 
-func serverCmd() *cobra.Command {
+func serverCmd(configuration config.Config, db *gorm.DB) *cobra.Command {
 	return &cobra.Command{
 		Use: "server",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Handle Subsequent requests
-			// handleRequests()
+			handler.HandleRequests(configuration, db)
 			return nil
 		},
 	}
 }
 
-func Run() {
+func Exec() {
+	db := database.Setup(true)
+	configuration := config.GetConfig()
 	cmd := &cobra.Command{
 		Use:     "dispatch",
 		Short:   "Dispatch Server",
 		Version: "0.1",
 	}
 
-	cmd.AddCommand(serverCmd())
-
-	db := database.Setup(true)
-	log.Println(db.Error.Error())
+	cmd.AddCommand(serverCmd(configuration, db))
 
 	if err := cmd.Execute(); err != nil {
 		//fmt.Println(err)
