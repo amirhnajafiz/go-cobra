@@ -7,7 +7,7 @@ import (
 
 type HttpHandlerFunc func(http.ResponseWriter, *http.Request)
 
-func CheckSecurity(configuration config.Config, next HttpHandlerFunc) HttpHandlerFunc {
+func Auth(configuration config.Config, next HttpHandlerFunc) HttpHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		header := r.Header.Get("token")
 		if header != configuration.Token {

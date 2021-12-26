@@ -25,7 +25,7 @@ func HandleRequests(configuration config.Config, db *gorm.DB) {
 	var m *autocert.Manager
 
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/tasks", middleware.CheckSecurity(configuration, handler.AllTasksHandler(db))).Methods("GET")
+	router.HandleFunc("/tasks", middleware.Auth(configuration, handler.AllTasksHandler(db))).Methods("GET")
 
 	if configuration.SSLMode == "development" {
 		// Generate ca.crt and ca.key if not found
