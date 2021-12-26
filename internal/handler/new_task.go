@@ -3,6 +3,7 @@ package handler
 import (
 	"cmd/internal/middleware"
 	"cmd/internal/models"
+	"cmd/pkg/command-runner"
 	"encoding/json"
 	"fmt"
 	"gorm.io/gorm"
@@ -22,8 +23,7 @@ func NewTaskHandler(db *gorm.DB) middleware.HttpHandlerFunc {
 		response := "{ \"task_id\" : " + taskID + "}"
 		_, _ = fmt.Fprintf(w, response)
 
-		// Starts running CaptainCore command
-		// TODO
-		// go runCommand("captaincore "+task.Command, task)
+		// Starts running Captain-Core command
+		go command_runner.RunCommand("captain-core "+task.Command, task, db)
 	}
 }

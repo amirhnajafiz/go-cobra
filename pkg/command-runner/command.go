@@ -9,7 +9,7 @@ import (
 	"regexp"
 )
 
-func runCommand(cmd string, t models.Task, db *gorm.DB) string {
+func RunCommand(cmd string, t models.Task, db *gorm.DB) string {
 	// See https://regexr.com/4154h for custom regex to parse commands
 	// Inspired by https://gist.github.com/danesparza/a651ac923d6313b9d1b7563c9245743b
 	pattern := `(--[^\s]+="[^"]+")|"([^"]+)"|'([^']+)'|([^\s]+)`
