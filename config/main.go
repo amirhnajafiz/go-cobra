@@ -7,7 +7,7 @@ import (
 )
 
 // type Config, Storing all the configurations inside this variable
-var config = LoadConfiguration("../config.json")
+var config = LoadConfiguration("config.json")
 
 type Config struct {
 	Token   string `json:"token"`
