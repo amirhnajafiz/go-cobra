@@ -4,4 +4,4 @@
 dev:
 	clear
 	echo "Building Application ..."
-	go run cmd/main.go
+	go run cmd/main.go server

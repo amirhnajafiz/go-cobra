@@ -13,10 +13,9 @@ import (
 func serverCmd(configuration config.Config, db *gorm.DB) *cobra.Command {
 	return &cobra.Command{
 		Use: "server",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Run: func(cmd *cobra.Command, args []string) {
 			// Handle Subsequent requests
 			handler.HandleRequests(configuration, db)
-			return nil
 		},
 	}
 }
