@@ -29,6 +29,7 @@ func HandleRequests(configuration config.Config, db *gorm.DB) {
 	router.HandleFunc("/tasks/{page}", middleware.Auth(configuration, handler.AllTasksHandler(db))).Methods("GET")
 	router.HandleFunc("/run", middleware.Auth(configuration, handler.NewRunHandler(db))).Methods("POST")
 	router.HandleFunc("/tasks", middleware.Auth(configuration, handler.NewTaskHandler(db))).Methods("POST")
+	router.HandleFunc("/task/{id}", middleware.Auth(configuration, handler.DeleteTaskHandler(db))).Methods("DELETE")
 
 	if configuration.SSLMode == "development" {
 		// Generate ca.crt and ca.key if not found
