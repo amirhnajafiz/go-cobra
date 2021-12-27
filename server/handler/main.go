@@ -5,6 +5,7 @@ import (
 	"cmd/internal/handler"
 	"cmd/internal/middleware"
 	"cmd/pkg/encrypt"
+	zap_logger "cmd/pkg/zap-logger"
 	"cmd/server"
 	"context"
 	"crypto/tls"
@@ -13,7 +14,6 @@ import (
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/acme/autocert"
 	"gorm.io/gorm"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -44,8 +44,8 @@ func HandleRequests(configuration config.Config, db *gorm.DB) {
 		encrypt.GenerateCert()
 
 		// Launch HTTPS server
-		fmt.Println("Starting server https://" + configuration.Host + ":" + configuration.Port)
-		log.Fatal(http.ListenAndServeTLS(":"+configuration.Port, "certs/cert.pem", "certs/key.pem", handlers.LoggingHandler(os.Stdout, router)))
+		zap_logger.GetLogger().Info("Starting server https://" + configuration.Host + ":" + configuration.Port)
+		zap_logger.GetLogger().Fatal(http.ListenAndServeTLS(":"+configuration.Port, "certs/cert.pem", "certs/key.pem", handlers.LoggingHandler(os.Stdout, router)).Error())
 	}
 
 	if configuration.SSLMode == "production" {
@@ -93,16 +93,16 @@ func HandleRequests(configuration config.Config, db *gorm.DB) {
 
 		// Launch HTTP server
 		go func() {
-			fmt.Println("Starting server http://localhost")
+			zap_logger.GetLogger().Info("Starting server http://localhost")
 
 			err := httpSrv.ListenAndServe()
 			if err != nil {
-				log.Fatalf("httpSrv.ListenAndServe() failed with %s", err)
+				zap_logger.GetLogger().Fatal("httpSrv.ListenAndServe() failed with " + err.Error())
 			}
 		}()
 
 		// Launch HTTPS server
-		fmt.Println("Starting server https://" + configuration.Host + ":" + configuration.Port)
-		log.Fatal(httpsSrv.ListenAndServeTLS("", ""))
+		zap_logger.GetLogger().Info("Starting server https://" + configuration.Host + ":" + configuration.Port)
+		zap_logger.GetLogger().Fatal(httpsSrv.ListenAndServeTLS("", "").Error())
 	}
 }
