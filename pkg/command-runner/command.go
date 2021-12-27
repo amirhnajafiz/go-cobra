@@ -4,14 +4,14 @@ import (
 	"bytes"
 	"cmd/internal/models"
 	"cmd/pkg/json-check"
+	zap_logger "cmd/pkg/zap-logger"
 	"gorm.io/gorm"
 	"os/exec"
 	"regexp"
+	"strconv"
 )
 
 func RunCommand(cmd string, t models.Task, db *gorm.DB) string {
-	// See https://regexr.com/4154h for custom regex to parse commands
-	// Inspired by https://gist.github.com/danesparza/a651ac923d6313b9d1b7563c9245743b
 	pattern := `(--[^\s]+="[^"]+")|"([^"]+)"|'([^']+)'|([^\s]+)`
 	parts := regexp.MustCompile(pattern).FindAllString(cmd, -1)
 
@@ -29,7 +29,11 @@ func RunCommand(cmd string, t models.Task, db *gorm.DB) string {
 	command.Stderr = &stderr // Standard errors: stderr.String()
 
 	//	Run the command
-	command.Run()
+	err := command.Run()
+
+	if err != nil {
+		zap_logger.GetLogger().Fatal(strconv.Itoa(int(t.ID)) + " command execution fail")
+	}
 
 	t.Status = "Completed"
 
@@ -41,5 +45,4 @@ func RunCommand(cmd string, t models.Task, db *gorm.DB) string {
 	db.Save(&t)
 
 	return out.String()
-
 }
