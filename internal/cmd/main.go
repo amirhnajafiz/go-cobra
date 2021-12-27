@@ -4,7 +4,7 @@ import (
 	"cmd/config"
 	"cmd/internal/command"
 	"cmd/internal/database"
-	"fmt"
+	"cmd/pkg/zap-logger"
 	"os"
 )
 
@@ -14,7 +14,7 @@ func Exec() {
 	cmd := command.InitCommands(configuration, db)
 
 	if err := cmd.Execute(); err != nil {
-		fmt.Println(err.Error())
+		zap_logger.GetLogger().Error(err.Error())
 		os.Exit(0)
 	}
 }
