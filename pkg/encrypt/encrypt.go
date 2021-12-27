@@ -1,13 +1,13 @@
 package encrypt
 
 import (
+	zap_logger "cmd/pkg/zap-logger"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
-	"log"
 	"math/big"
 	"os"
 	"time"
@@ -36,7 +36,7 @@ func GenerateCertificateAuthority() {
 	pub := &privacy.PublicKey
 	caB, err := x509.CreateCertificate(rand.Reader, ca, ca, pub, privacy)
 	if err != nil {
-		log.Println("create ca failed", err)
+		zap_logger.GetLogger().Error("create ca failed : " + err.Error())
 		return
 	}
 
@@ -46,24 +46,24 @@ func GenerateCertificateAuthority() {
 	certOut, err := os.Create("certs/ca.crt")
 	_ = pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: caB})
 	_ = certOut.Close()
-	log.Print("written certs/cat.crt\n")
+	zap_logger.GetLogger().Info("written certs/cat.crt\n")
 
 	// Private key
 	keyOut, err := os.OpenFile("certs/ca.key", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	_ = pem.Encode(keyOut, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(privacy)})
 	keyOut.Close()
-	log.Print("written certs/ca.key\n")
+	zap_logger.GetLogger().Info("written certs/ca.key\n")
 }
 
 func GenerateCert() {
 	// Load CA
 	calts, err := tls.LoadX509KeyPair("certs/ca.crt", "certs/ca.key")
 	if err != nil {
-		panic(err)
+		zap_logger.GetLogger().Panic(err.Error())
 	}
 	ca, err := x509.ParseCertificate(calts.Certificate[0])
 	if err != nil {
-		panic(err)
+		zap_logger.GetLogger().Panic(err.Error())
 	}
 
 	// Prepare certificate
@@ -97,11 +97,11 @@ func GenerateCert() {
 	certOut, err := os.Create("certs/cert.pem")
 	_ = pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: certB})
 	certOut.Close()
-	log.Print("written certs/cert.pem\n")
+	zap_logger.GetLogger().Info("written certs/cert.pem\n")
 
 	// Private key
 	keyOut, err := os.OpenFile("certs/key.pem", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	_ = pem.Encode(keyOut, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(priv)})
 	keyOut.Close()
-	log.Print("written certs/key.pem\n")
+	zap_logger.GetLogger().Info("written certs/key.pem\n")
 }
