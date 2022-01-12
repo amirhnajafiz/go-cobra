@@ -2,7 +2,7 @@ package handler
 
 import (
 	"cmd/config"
-	"cmd/internal/handler"
+	handler2 "cmd/internal/http/handler"
 	"cmd/internal/middleware"
 	"cmd/pkg/encrypt"
 	zap_logger "cmd/pkg/zap-logger"
@@ -25,13 +25,13 @@ func HandleRequests(configuration config.Config, db *gorm.DB) {
 	var m *autocert.Manager
 
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/tasks", middleware.Auth(configuration, handler.AllTasksHandler(db))).Methods("GET")
-	router.HandleFunc("/tasks/{page}", middleware.Auth(configuration, handler.AllTasksHandler(db))).Methods("GET")
-	router.HandleFunc("/run", middleware.Auth(configuration, handler.NewRunHandler(db))).Methods("POST")
-	router.HandleFunc("/tasks", middleware.Auth(configuration, handler.NewTaskHandler(db))).Methods("POST")
-	router.HandleFunc("/task/{id}", middleware.Auth(configuration, handler.DeleteTaskHandler(db))).Methods("DELETE")
-	router.HandleFunc("/task/{id}", middleware.Auth(configuration, handler.ViewTaskHandler(db))).Methods("GET")
-	router.HandleFunc("/task/{id}", middleware.Auth(configuration, handler.UpdateTaskHandler(db))).Methods("PUT")
+	router.HandleFunc("/tasks", middleware.Auth(configuration, handler2.AllTasksHandler(db))).Methods("GET")
+	router.HandleFunc("/tasks/{page}", middleware.Auth(configuration, handler2.AllTasksHandler(db))).Methods("GET")
+	router.HandleFunc("/run", middleware.Auth(configuration, handler2.NewRunHandler(db))).Methods("POST")
+	router.HandleFunc("/tasks", middleware.Auth(configuration, handler2.NewTaskHandler(db))).Methods("POST")
+	router.HandleFunc("/task/{id}", middleware.Auth(configuration, handler2.DeleteTaskHandler(db))).Methods("DELETE")
+	router.HandleFunc("/task/{id}", middleware.Auth(configuration, handler2.ViewTaskHandler(db))).Methods("GET")
+	router.HandleFunc("/task/{id}", middleware.Auth(configuration, handler2.UpdateTaskHandler(db))).Methods("PUT")
 
 	if configuration.SSLMode == "development" {
 		// Generate ca.crt and ca.key if not found
