@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"cmd/config"
 	"cmd/internal/command"
+	"cmd/internal/config"
 	"cmd/internal/database"
 	"cmd/pkg/zap-logger"
 	"os"
