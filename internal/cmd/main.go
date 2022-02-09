@@ -8,7 +8,8 @@ import (
 	"os"
 )
 
-func Exec() {
+// Execute will setup database, configurations and cobra
+func Execute() {
 	db := database.Setup(true)
 	configuration := config.GetConfig()
 	cmd := command.InitCommands(configuration, db)

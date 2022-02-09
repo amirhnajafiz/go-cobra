@@ -4,6 +4,7 @@ import (
 	"cmd/internal/cmd"
 )
 
+// Starting point of our dispatching application
 func main() {
-	cmd.Exec()
+	cmd.Execute()
 }
