@@ -11,7 +11,7 @@ import (
 // Execute will setup database, configurations and cobra
 func Execute() {
 	db := database.Setup(true)
-	configuration := config.GetConfig()
+	configuration := config.LoadConfiguration()
 	cmd := command.InitCommands(configuration, db)
 
 	if err := cmd.Execute(); err != nil {

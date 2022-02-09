@@ -6,19 +6,11 @@ import (
 	"os"
 )
 
-// type Config, Storing all the configurations inside this variable
-var config = LoadConfiguration("config.json")
-
-type Config struct {
-	Token   string `json:"token"`
-	Host    string `json:"host"`
-	Port    string `json:"port"`
-	SSLMode string `json:"ssl_mode"`
-}
+var file = "config.json"
 
 // LoadConfiguration method opens the 'config.json' file
 // and imports the server configs into the config variable.
-func LoadConfiguration(file string) Config {
+func LoadConfiguration() Config {
 	var config Config
 
 	configFile, err := os.Open(file)
@@ -36,9 +28,5 @@ func LoadConfiguration(file string) Config {
 	jsonParser := json.NewDecoder(configFile)
 	_ = jsonParser.Decode(&config)
 
-	return config
-}
-
-func GetConfig() Config {
 	return config
 }
