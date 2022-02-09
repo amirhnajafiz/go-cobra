@@ -1,7 +1,7 @@
 package command
 
 import (
-	"cmd/config"
+	"cmd/internal/config"
 	"github.com/spf13/cobra"
 	"gorm.io/gorm"
 )

@@ -2,7 +2,7 @@ package database
 
 import (
 	"cmd/internal/models"
-	zap_logger "cmd/pkg/zap-logger"
+	logger "cmd/pkg/zap-logger"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -14,7 +14,7 @@ func initialMigration() {
 	err := db.AutoMigrate(&models.Task{})
 
 	if err != nil {
-		zap_logger.GetLogger().Error("auto migration fail!")
+		logger.GetLogger().Error("auto migration fail!")
 	}
 }
 
@@ -23,12 +23,12 @@ func Setup(migrate bool) *gorm.DB {
 	db, err = gorm.Open(sqlite.Open("sql.db"), &gorm.Config{})
 
 	if err != nil {
-		zap_logger.GetLogger().Fatal("database connection fail!")
+		logger.GetLogger().Fatal("database connection fail!")
 	}
 
 	if migrate {
 		initialMigration()
-		zap_logger.GetLogger().Info("migration done successfully.")
+		logger.GetLogger().Info("migration done successfully.")
 	}
 
 	return db
