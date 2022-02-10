@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"cmd/internal/http/request"
+	http2 "cmd/internal/http"
 	"cmd/internal/middleware"
 	"cmd/internal/models"
 	commander "cmd/pkg/command-runner"
@@ -69,7 +69,7 @@ func NewTaskHandler(db *gorm.DB) middleware.HttpHandlerFunc {
 		var task models.Task
 		_ = json.NewDecoder(r.Body).Decode(&task)
 
-		err := request.Validate(task)
+		err := http2.Validate(task)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			_, _ = fmt.Fprint(w, err.Error())

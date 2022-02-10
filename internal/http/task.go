@@ -1,4 +1,4 @@
-package request
+package http
 
 import "cmd/internal/models"
 
