@@ -1,8 +1,8 @@
 package command
 
 import (
+	"cmd/internal/cmd/server/handler"
 	"cmd/internal/config"
-	"cmd/server/handler"
 	"github.com/spf13/cobra"
 	"gorm.io/gorm"
 )

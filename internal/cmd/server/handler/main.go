@@ -1,12 +1,12 @@
 package handler
 
 import (
-	"cmd/config"
+	"cmd/internal/cmd/server"
+	"cmd/internal/config"
 	handler2 "cmd/internal/http/handler"
 	"cmd/internal/middleware"
 	"cmd/pkg/encrypt"
-	zap_logger "cmd/pkg/zap-logger"
-	"cmd/server"
+	logger "cmd/pkg/zap-logger"
 	"context"
 	"crypto/tls"
 	"fmt"
@@ -44,8 +44,8 @@ func HandleRequests(configuration config.Config, db *gorm.DB) {
 		encrypt.GenerateCert()
 
 		// Launch HTTPS server
-		zap_logger.GetLogger().Info("Starting server https://" + configuration.Host + ":" + configuration.Port)
-		zap_logger.GetLogger().Fatal(http.ListenAndServeTLS(":"+configuration.Port, "certs/cert.pem", "certs/key.pem", handlers.LoggingHandler(os.Stdout, router)).Error())
+		logger.GetLogger().Info("Starting server https://" + configuration.Host + ":" + configuration.Port)
+		logger.GetLogger().Fatal(http.ListenAndServeTLS(":"+configuration.Port, "certs/cert.pem", "certs/key.pem", handlers.LoggingHandler(os.Stdout, router)).Error())
 	}
 
 	if configuration.SSLMode == "production" {
@@ -93,16 +93,16 @@ func HandleRequests(configuration config.Config, db *gorm.DB) {
 
 		// Launch HTTP server
 		go func() {
-			zap_logger.GetLogger().Info("Starting server http://localhost")
+			logger.GetLogger().Info("Starting server http://localhost")
 
 			err := httpSrv.ListenAndServe()
 			if err != nil {
-				zap_logger.GetLogger().Fatal("httpSrv.ListenAndServe() failed with " + err.Error())
+				logger.GetLogger().Fatal("httpSrv.ListenAndServe() failed with " + err.Error())
 			}
 		}()
 
 		// Launch HTTPS server
-		zap_logger.GetLogger().Info("Starting server https://" + configuration.Host + ":" + configuration.Port)
-		zap_logger.GetLogger().Fatal(httpsSrv.ListenAndServeTLS("", "").Error())
+		logger.GetLogger().Info("Starting server https://" + configuration.Host + ":" + configuration.Port)
+		logger.GetLogger().Fatal(httpsSrv.ListenAndServeTLS("", "").Error())
 	}
 }
