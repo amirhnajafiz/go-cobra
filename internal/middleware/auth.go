@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"cmd/config"
+	"cmd/internal/config"
 	"net/http"
 )
 
