@@ -1,7 +1,6 @@
-package handler
+package server
 
 import (
-	"cmd/internal/cmd/server"
 	"cmd/internal/config"
 	handler2 "cmd/internal/http/handler"
 	"cmd/internal/middleware"
@@ -19,36 +18,46 @@ import (
 	"time"
 )
 
-func HandleRequests(configuration config.Config, db *gorm.DB) {
+type Setup struct {
+	configuration config.Config
+	db            *gorm.DB
+}
+
+func (s Setup) HandleRequests() {
 	var httpsSrv *http.Server
 	var httpSrv *http.Server
 	var m *autocert.Manager
+	handler := handler2.Handler{
+		DB: s.db,
+	}
 
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/tasks", middleware.Auth(configuration, handler2.AllTasksHandler(db))).Methods("GET")
-	router.HandleFunc("/tasks/{page}", middleware.Auth(configuration, handler2.AllTasksHandler(db))).Methods("GET")
-	router.HandleFunc("/run", middleware.Auth(configuration, handler2.NewRunHandler(db))).Methods("POST")
-	router.HandleFunc("/tasks", middleware.Auth(configuration, handler2.NewTaskHandler(db))).Methods("POST")
-	router.HandleFunc("/task/{id}", middleware.Auth(configuration, handler2.DeleteTaskHandler(db))).Methods("DELETE")
-	router.HandleFunc("/task/{id}", middleware.Auth(configuration, handler2.ViewTaskHandler(db))).Methods("GET")
-	router.HandleFunc("/task/{id}", middleware.Auth(configuration, handler2.UpdateTaskHandler(db))).Methods("PUT")
+	router.HandleFunc("/tasks", middleware.Auth(s.configuration, handler.AllTasksHandler())).Methods("GET")
+	router.HandleFunc("/tasks/{page}", middleware.Auth(s.configuration, handler.AllTasksHandler())).Methods("GET")
+	router.HandleFunc("/run", middleware.Auth(s.configuration, handler.NewRunHandler())).Methods("POST")
+	router.HandleFunc("/tasks", middleware.Auth(s.configuration, handler.NewTaskHandler())).Methods("POST")
+	router.HandleFunc("/task/{id}", middleware.Auth(s.configuration, handler.DeleteTaskHandler())).Methods("DELETE")
+	router.HandleFunc("/task/{id}", middleware.Auth(s.configuration, handler.ViewTaskHandler())).Methods("GET")
+	router.HandleFunc("/task/{id}", middleware.Auth(s.configuration, handler.UpdateTaskHandler())).Methods("PUT")
 
-	if configuration.SSLMode == "development" {
+	if s.configuration.SSLMode == "development" {
 		// Generate ca.crt and ca.key if not found
 		caFile, err := os.Open("certs/ca.crt")
 		if err != nil {
 			encrypt.GenerateCertificateAuthority()
 		}
-		defer caFile.Close()
+		defer func(caFile *os.File) {
+			_ = caFile.Close()
+		}(caFile)
 		// Generate cert.pem and key.pem for https://localhost
 		encrypt.GenerateCert()
 
 		// Launch HTTPS server
-		logger.GetLogger().Info("Starting server https://" + configuration.Host + ":" + configuration.Port)
-		logger.GetLogger().Fatal(http.ListenAndServeTLS(":"+configuration.Port, "certs/cert.pem", "certs/key.pem", handlers.LoggingHandler(os.Stdout, router)).Error())
+		logger.GetLogger().Info("Starting server https://" + s.configuration.Host + ":" + s.configuration.Port)
+		logger.GetLogger().Fatal(http.ListenAndServeTLS(":"+s.configuration.Port, "certs/cert.pem", "certs/key.pem", handlers.LoggingHandler(os.Stdout, router)).Error())
 	}
 
-	if configuration.SSLMode == "production" {
+	if s.configuration.SSLMode == "production" {
 
 		// Manage Let's Encrypt SSL
 
@@ -65,7 +74,7 @@ func HandleRequests(configuration config.Config, db *gorm.DB) {
 		dataDir := "certs/"
 		hostPolicy := func(ctx context.Context, host string) error {
 			// Note: change to your real domain
-			allowedHost := configuration.Host
+			allowedHost := s.configuration.Host
 			if host == allowedHost {
 				return nil
 			}
@@ -78,11 +87,11 @@ func HandleRequests(configuration config.Config, db *gorm.DB) {
 			Cache:      autocert.DirCache(dataDir),
 		}
 
-		httpsSrv.Addr = configuration.Host + ":443"
+		httpsSrv.Addr = s.configuration.Host + ":443"
 		httpsSrv.TLSConfig = &tls.Config{GetCertificate: m.GetCertificate}
 
 		// Spin up web server on port 80 to listen for auto-cert HTTP challenge
-		httpSrv = server.MakeHTTPServer()
+		httpSrv = MakeHTTPServer()
 		httpSrv.Addr = ":80"
 
 		// allow auto-cert handle Let's Encrypt auth callbacks over HTTP.
@@ -102,7 +111,7 @@ func HandleRequests(configuration config.Config, db *gorm.DB) {
 		}()
 
 		// Launch HTTPS server
-		logger.GetLogger().Info("Starting server https://" + configuration.Host + ":" + configuration.Port)
+		logger.GetLogger().Info("Starting server https://" + s.configuration.Host + ":" + s.configuration.Port)
 		logger.GetLogger().Fatal(httpsSrv.ListenAndServeTLS("", "").Error())
 	}
 }
