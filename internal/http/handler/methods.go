@@ -8,12 +8,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
-	"gorm.io/gorm"
 	"net/http"
 	"strconv"
 )
 
-func AllTasksHandler(db *gorm.DB) middleware.HttpHandlerFunc {
+func (h Handler) AllTasksHandler() middleware.HttpHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var tasks []models.Task
 
@@ -22,29 +21,29 @@ func AllTasksHandler(db *gorm.DB) middleware.HttpHandlerFunc {
 
 		if page > 0 {
 			offset := page * 10
-			db.Offset(offset).Limit(10).Order("created_at desc").Find(&tasks)
+			h.DB.Offset(offset).Limit(10).Order("created_at desc").Find(&tasks)
 		} else {
-			db.Limit(10).Order("created_at desc").Find(&tasks)
+			h.DB.Limit(10).Order("created_at desc").Find(&tasks)
 		}
 
 		_ = json.NewEncoder(w).Encode(tasks)
 	}
 }
 
-func DeleteTaskHandler(db *gorm.DB) middleware.HttpHandlerFunc {
+func (h Handler) DeleteTaskHandler() middleware.HttpHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		command := vars["command"]
 
 		var tasks models.Task
-		db.Where("command = ?", command).Find(&tasks)
-		db.Delete(&tasks)
+		h.DB.Where("command = ?", command).Find(&tasks)
+		h.DB.Delete(&tasks)
 
 		_, _ = fmt.Fprintf(w, "Successfully Deleted Task")
 	}
 }
 
-func NewRunHandler(db *gorm.DB) middleware.HttpHandlerFunc {
+func (h Handler) NewRunHandler() middleware.HttpHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var task models.Task
 		err := json.NewDecoder(r.Body).Decode(&task)
@@ -55,16 +54,16 @@ func NewRunHandler(db *gorm.DB) middleware.HttpHandlerFunc {
 
 		task.Status = "Started"
 
-		db.Create(&task)
+		h.DB.Create(&task)
 
 		// Starts running CaptainCore command
-		response := commander.RunCommand("captain-core "+task.Command, task, db)
+		response := commander.RunCommand("captain-core "+task.Command, task, h.DB)
 		_, _ = fmt.Fprintf(w, response)
 
 	}
 }
 
-func NewTaskHandler(db *gorm.DB) middleware.HttpHandlerFunc {
+func (h Handler) NewTaskHandler() middleware.HttpHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var task models.Task
 		_ = json.NewDecoder(r.Body).Decode(&task)
@@ -77,38 +76,38 @@ func NewTaskHandler(db *gorm.DB) middleware.HttpHandlerFunc {
 
 		task.Status = "Started"
 
-		db.Create(&task)
+		h.DB.Create(&task)
 		taskID := strconv.FormatUint(uint64(task.ID), 10)
 		response := "{ \"task_id\" : " + taskID + "}"
 		_, _ = fmt.Fprintf(w, response)
 
 		// Starts running Captain-Core command
-		go commander.RunCommand("captain-core "+task.Command, task, db)
+		go commander.RunCommand("captain-core "+task.Command, task, h.DB)
 	}
 }
 
-func UpdateTaskHandler(db *gorm.DB) middleware.HttpHandlerFunc {
+func (h Handler) UpdateTaskHandler() middleware.HttpHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		command := vars["command"]
 
 		var tasks models.Task
-		db.Where("command = ?", command).Find(&tasks)
+		h.DB.Where("command = ?", command).Find(&tasks)
 
 		tasks.Command = command
 
-		db.Save(&tasks)
+		h.DB.Save(&tasks)
 		_, _ = fmt.Fprintf(w, "Successfully Updated Task")
 	}
 }
 
-func ViewTaskHandler(db *gorm.DB) middleware.HttpHandlerFunc {
+func (h Handler) ViewTaskHandler() middleware.HttpHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id := vars["id"]
 
 		var tasks models.Task
-		db.Where("id = ?", id).Find(&tasks)
+		h.DB.Where("id = ?", id).Find(&tasks)
 		fmt.Println("{}", tasks)
 
 		_ = json.NewEncoder(w).Encode(tasks)
