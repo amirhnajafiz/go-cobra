@@ -28,19 +28,19 @@ func (s Setup) HandleRequests() {
 	var httpSrv *http.Server
 	var m *autocert.Manager
 	handler := handler2.Handler{
-		DB: s.db,
+		DB: s.DB,
 	}
 
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/tasks", middleware.Auth(s.configuration, handler.AllTasksHandler())).Methods("GET")
-	router.HandleFunc("/tasks/{page}", middleware.Auth(s.configuration, handler.AllTasksHandler())).Methods("GET")
-	router.HandleFunc("/run", middleware.Auth(s.configuration, handler.NewRunHandler())).Methods("POST")
-	router.HandleFunc("/tasks", middleware.Auth(s.configuration, handler.NewTaskHandler())).Methods("POST")
-	router.HandleFunc("/task/{id}", middleware.Auth(s.configuration, handler.DeleteTaskHandler())).Methods("DELETE")
-	router.HandleFunc("/task/{id}", middleware.Auth(s.configuration, handler.ViewTaskHandler())).Methods("GET")
-	router.HandleFunc("/task/{id}", middleware.Auth(s.configuration, handler.UpdateTaskHandler())).Methods("PUT")
+	router.HandleFunc("/tasks", middleware.Auth(s.Configuration, handler.AllTasksHandler())).Methods("GET")
+	router.HandleFunc("/tasks/{page}", middleware.Auth(s.Configuration, handler.AllTasksHandler())).Methods("GET")
+	router.HandleFunc("/run", middleware.Auth(s.Configuration, handler.NewRunHandler())).Methods("POST")
+	router.HandleFunc("/tasks", middleware.Auth(s.Configuration, handler.NewTaskHandler())).Methods("POST")
+	router.HandleFunc("/task/{id}", middleware.Auth(s.Configuration, handler.DeleteTaskHandler())).Methods("DELETE")
+	router.HandleFunc("/task/{id}", middleware.Auth(s.Configuration, handler.ViewTaskHandler())).Methods("GET")
+	router.HandleFunc("/task/{id}", middleware.Auth(s.Configuration, handler.UpdateTaskHandler())).Methods("PUT")
 
-	if s.configuration.SSLMode == "development" {
+	if s.Configuration.SSLMode == "development" {
 		// Generate ca.crt and ca.key if not found
 		caFile, err := os.Open("certs/ca.crt")
 		if err != nil {
@@ -53,11 +53,11 @@ func (s Setup) HandleRequests() {
 		encrypt.GenerateCert()
 
 		// Launch HTTPS server
-		logger.GetLogger().Info("Starting server https://" + s.configuration.Host + ":" + s.configuration.Port)
-		logger.GetLogger().Fatal(http.ListenAndServeTLS(":"+s.configuration.Port, "certs/cert.pem", "certs/key.pem", handlers.LoggingHandler(os.Stdout, router)).Error())
+		logger.GetLogger().Info("Starting server https://" + s.Configuration.Host + ":" + s.Configuration.Port)
+		logger.GetLogger().Fatal(http.ListenAndServeTLS(":"+s.Configuration.Port, "certs/cert.pem", "certs/key.pem", handlers.LoggingHandler(os.Stdout, router)).Error())
 	}
 
-	if s.configuration.SSLMode == "production" {
+	if s.Configuration.SSLMode == "production" {
 
 		// Manage Let's Encrypt SSL
 
@@ -74,7 +74,7 @@ func (s Setup) HandleRequests() {
 		dataDir := "certs/"
 		hostPolicy := func(ctx context.Context, host string) error {
 			// Note: change to your real domain
-			allowedHost := s.configuration.Host
+			allowedHost := s.Configuration.Host
 			if host == allowedHost {
 				return nil
 			}
@@ -87,7 +87,7 @@ func (s Setup) HandleRequests() {
 			Cache:      autocert.DirCache(dataDir),
 		}
 
-		httpsSrv.Addr = s.configuration.Host + ":443"
+		httpsSrv.Addr = s.Configuration.Host + ":443"
 		httpsSrv.TLSConfig = &tls.Config{GetCertificate: m.GetCertificate}
 
 		// Spin up web server on port 80 to listen for auto-cert HTTP challenge
@@ -111,7 +111,7 @@ func (s Setup) HandleRequests() {
 		}()
 
 		// Launch HTTPS server
-		logger.GetLogger().Info("Starting server https://" + s.configuration.Host + ":" + s.configuration.Port)
+		logger.GetLogger().Info("Starting server https://" + s.Configuration.Host + ":" + s.Configuration.Port)
 		logger.GetLogger().Fatal(httpsSrv.ListenAndServeTLS("", "").Error())
 	}
 }
