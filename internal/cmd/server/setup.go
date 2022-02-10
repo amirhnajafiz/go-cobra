@@ -19,8 +19,8 @@ import (
 )
 
 type Setup struct {
-	configuration config.Config
-	db            *gorm.DB
+	Configuration config.Config
+	DB            *gorm.DB
 }
 
 func (s Setup) HandleRequests() {
