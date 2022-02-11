@@ -30,15 +30,18 @@ func (s Setup) HandleRequests() {
 	handler := handler2.Handler{
 		DB: s.DB,
 	}
+	mid := middleware.Middleware{
+		Configuration: s.Configuration,
+	}
 
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/tasks", middleware.Auth(s.Configuration, handler.AllTasksHandler())).Methods("GET")
-	router.HandleFunc("/tasks/{page}", middleware.Auth(s.Configuration, handler.AllTasksHandler())).Methods("GET")
-	router.HandleFunc("/run", middleware.Auth(s.Configuration, handler.NewRunHandler())).Methods("POST")
-	router.HandleFunc("/tasks", middleware.Auth(s.Configuration, handler.NewTaskHandler())).Methods("POST")
-	router.HandleFunc("/task/{id}", middleware.Auth(s.Configuration, handler.DeleteTaskHandler())).Methods("DELETE")
-	router.HandleFunc("/task/{id}", middleware.Auth(s.Configuration, handler.ViewTaskHandler())).Methods("GET")
-	router.HandleFunc("/task/{id}", middleware.Auth(s.Configuration, handler.UpdateTaskHandler())).Methods("PUT")
+	router.HandleFunc("/tasks", mid.Auth(handler.AllTasksHandler())).Methods("GET")
+	router.HandleFunc("/tasks/{page}", mid.Auth(handler.AllTasksHandler())).Methods("GET")
+	router.HandleFunc("/run", mid.Auth(handler.NewRunHandler())).Methods("POST")
+	router.HandleFunc("/tasks", mid.Auth(handler.NewTaskHandler())).Methods("POST")
+	router.HandleFunc("/task/{id}", mid.Auth(handler.DeleteTaskHandler())).Methods("DELETE")
+	router.HandleFunc("/task/{id}", mid.Auth(handler.ViewTaskHandler())).Methods("GET")
+	router.HandleFunc("/task/{id}", mid.Auth(handler.UpdateTaskHandler())).Methods("PUT")
 
 	if s.Configuration.SSLMode == "development" {
 		// Generate ca.crt and ca.key if not found
