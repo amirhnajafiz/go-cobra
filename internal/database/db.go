@@ -7,29 +7,27 @@ import (
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
-
-func initialMigration() {
+func (d Database) initialMigration() {
 	// Migrate the project schema
-	err := db.AutoMigrate(&models.Task{})
+	err := d.DB.AutoMigrate(&models.Task{})
 
 	if err != nil {
 		logger.GetLogger().Error("auto migration fail!")
 	}
 }
 
-func Setup(migrate bool) *gorm.DB {
+func (d Database) Setup(migrate bool) *gorm.DB {
 	var err error
-	db, err = gorm.Open(sqlite.Open("sql.db"), &gorm.Config{})
+	d.DB, err = gorm.Open(sqlite.Open("sql.db"), &gorm.Config{})
 
 	if err != nil {
 		logger.GetLogger().Fatal("database connection fail!")
 	}
 
 	if migrate {
-		initialMigration()
+		d.initialMigration()
 		logger.GetLogger().Info("migration done successfully.")
 	}
 
-	return db
+	return d.DB
 }
