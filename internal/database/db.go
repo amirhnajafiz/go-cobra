@@ -16,7 +16,7 @@ func (d Database) initialMigration() {
 	}
 }
 
-func (d Database) Setup(migrate bool) *gorm.DB {
+func (d Database) Setup(migrate bool) Database {
 	var err error
 	d.DB, err = gorm.Open(sqlite.Open("sql.db"), &gorm.Config{})
 
@@ -29,5 +29,5 @@ func (d Database) Setup(migrate bool) *gorm.DB {
 		logger.GetLogger().Info("migration done successfully.")
 	}
 
-	return d.DB
+	return d
 }
