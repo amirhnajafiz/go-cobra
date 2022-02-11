@@ -12,7 +12,10 @@ import (
 func Execute() {
 	configuration := config.LoadConfiguration()
 	db := database.Database{}.Setup(configuration.Migration)
-	cmd := command.InitCommands(configuration, db)
+	cmd := command.Commander{
+		DB:            db.DB,
+		Configuration: configuration,
+	}.InitCommands()
 
 	if err := cmd.Execute(); err != nil {
 		zap_logger.GetLogger().Error(err.Error())
