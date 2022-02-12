@@ -50,17 +50,17 @@ func (e Encrypt) GenerateCertificateAuthority() {
 	// Private key
 	keyOut, err := os.OpenFile("certs/ca.key", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	_ = pem.Encode(keyOut, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(privacy)})
-	keyOut.Close()
+	_ = keyOut.Close()
 	e.Logger.Info("written certs/ca.key\n")
 }
 
 func (e Encrypt) GenerateCert() {
 	// Load CA
-	calts, err := tls.LoadX509KeyPair("certs/ca.crt", "certs/ca.key")
+	cults, err := tls.LoadX509KeyPair("certs/ca.crt", "certs/ca.key")
 	if err != nil {
 		e.Logger.Panic(err.Error())
 	}
-	ca, err := x509.ParseCertificate(calts.Certificate[0])
+	ca, err := x509.ParseCertificate(cults.Certificate[0])
 	if err != nil {
 		e.Logger.Panic(err.Error())
 	}
@@ -86,21 +86,21 @@ func (e Encrypt) GenerateCert() {
 		DNSNames:              []string{"localhost"},
 	}
 
-	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
-	pub := &priv.PublicKey
+	privy, _ := rsa.GenerateKey(rand.Reader, 2048)
+	pub := &privy.PublicKey
 
 	// Sign the certificate
-	certB, err := x509.CreateCertificate(rand.Reader, cert, ca, pub, calts.PrivateKey)
+	certB, err := x509.CreateCertificate(rand.Reader, cert, ca, pub, cults.PrivateKey)
 
 	// Public key
 	certOut, err := os.Create("certs/cert.pem")
 	_ = pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: certB})
-	certOut.Close()
+	_ = certOut.Close()
 	e.Logger.Info("written certs/cert.pem\n")
 
 	// Private key
 	keyOut, err := os.OpenFile("certs/key.pem", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
-	_ = pem.Encode(keyOut, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(priv)})
-	keyOut.Close()
+	_ = pem.Encode(keyOut, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(privy)})
+	_ = keyOut.Close()
 	e.Logger.Info("written certs/key.pem\n")
 }
