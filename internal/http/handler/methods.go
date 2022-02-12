@@ -4,7 +4,7 @@ import (
 	http2 "cmd/internal/http"
 	"cmd/internal/middleware"
 	"cmd/internal/models"
-	commander "cmd/pkg/command-runner"
+	commander "cmd/pkg/runner"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"

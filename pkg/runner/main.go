@@ -1,4 +1,4 @@
-package command_runner
+package runner
 
 import (
 	"bytes"
