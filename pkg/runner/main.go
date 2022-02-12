@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"cmd/internal/models"
 	"cmd/pkg/checker"
-	logger "cmd/pkg/logger"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"os/exec"
 	"regexp"
@@ -12,7 +12,8 @@ import (
 )
 
 type Runner struct {
-	DB *gorm.DB
+	DB     *gorm.DB
+	Logger *zap.Logger
 }
 
 func (r Runner) RunCommand(cmd string, t models.Task) string {
@@ -36,7 +37,7 @@ func (r Runner) RunCommand(cmd string, t models.Task) string {
 	err := command.Run()
 
 	if err != nil {
-		logger.GetLogger().Fatal(strconv.Itoa(int(t.ID)) + " command execution fail")
+		r.Logger.Fatal(strconv.Itoa(int(t.ID)) + " command execution fail")
 	}
 
 	t.Status = "Completed"
