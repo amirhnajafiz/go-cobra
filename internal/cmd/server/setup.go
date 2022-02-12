@@ -2,10 +2,10 @@ package server
 
 import (
 	"cmd/internal/config"
-	handler2 "cmd/internal/http/handler"
+	"cmd/internal/http/handler"
 	"cmd/internal/middleware"
 	"cmd/pkg/encrypt"
-	logger "cmd/pkg/logger"
+	"cmd/pkg/logger"
 	"cmd/pkg/runner"
 	"context"
 	"crypto/tls"
@@ -28,7 +28,7 @@ func (s Setup) HandleRequests() {
 	var httpsSrv *http.Server
 	var httpSrv *http.Server
 	var m *autocert.Manager
-	handler := handler2.Handler{
+	hdl := handler.Handler{
 		DB: s.DB,
 		Runner: runner.Runner{
 			DB: s.DB,
@@ -39,13 +39,13 @@ func (s Setup) HandleRequests() {
 	}
 
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/tasks", mid.Auth(handler.AllTasksHandler())).Methods("GET")
-	router.HandleFunc("/tasks/{page}", mid.Auth(handler.AllTasksHandler())).Methods("GET")
-	router.HandleFunc("/run", mid.Auth(handler.NewRunHandler())).Methods("POST")
-	router.HandleFunc("/tasks", mid.Auth(handler.NewTaskHandler())).Methods("POST")
-	router.HandleFunc("/task/{id}", mid.Auth(handler.DeleteTaskHandler())).Methods("DELETE")
-	router.HandleFunc("/task/{id}", mid.Auth(handler.ViewTaskHandler())).Methods("GET")
-	router.HandleFunc("/task/{id}", mid.Auth(handler.UpdateTaskHandler())).Methods("PUT")
+	router.HandleFunc("/tasks", mid.Auth(hdl.AllTasksHandler())).Methods("GET")
+	router.HandleFunc("/tasks/{page}", mid.Auth(hdl.AllTasksHandler())).Methods("GET")
+	router.HandleFunc("/run", mid.Auth(hdl.NewRunHandler())).Methods("POST")
+	router.HandleFunc("/tasks", mid.Auth(hdl.NewTaskHandler())).Methods("POST")
+	router.HandleFunc("/task/{id}", mid.Auth(hdl.DeleteTaskHandler())).Methods("DELETE")
+	router.HandleFunc("/task/{id}", mid.Auth(hdl.ViewTaskHandler())).Methods("GET")
+	router.HandleFunc("/task/{id}", mid.Auth(hdl.UpdateTaskHandler())).Methods("PUT")
 
 	if s.Configuration.SSLMode == "development" {
 		// Generate ca.crt and ca.key if not found
