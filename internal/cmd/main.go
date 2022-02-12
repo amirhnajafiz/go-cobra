@@ -11,11 +11,14 @@ import (
 // Execute will setup database, configurations and cobra
 func Execute() {
 	configuration := config.LoadConfiguration()
-	db := database.Database{}.Setup(configuration.Migration)
+	log := logger.GetLogger()
+	db := database.Database{
+		Logger: log.Named("database"),
+	}.Setup(configuration.Migration)
 	cmd := command.Commander{
 		DB:            db.DB,
 		Configuration: configuration,
-		Logger:        logger.GetLogger().Named("commander"),
+		Logger:        log.Named("commander"),
 	}.InitCommands()
 
 	if err := cmd.Execute(); err != nil {

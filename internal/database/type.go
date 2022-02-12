@@ -1,7 +1,11 @@
 package database
 
-import "gorm.io/gorm"
+import (
+	"go.uber.org/zap"
+	"gorm.io/gorm"
+)
 
 type Database struct {
-	DB *gorm.DB
+	DB     *gorm.DB
+	Logger *zap.Logger
 }
