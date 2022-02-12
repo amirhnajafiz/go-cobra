@@ -5,7 +5,6 @@ import (
 	"cmd/internal/http/handler"
 	"cmd/internal/middleware"
 	"cmd/pkg/encrypt"
-	"cmd/pkg/logger"
 	"cmd/pkg/runner"
 	"context"
 	"crypto/tls"
@@ -66,8 +65,8 @@ func (s Setup) HandleRequests() {
 		enc.GenerateCert()
 
 		// Launch HTTPS server
-		logger.GetLogger().Info("Starting server https://" + s.Configuration.Host + ":" + s.Configuration.Port)
-		logger.GetLogger().Fatal(http.ListenAndServeTLS(":"+s.Configuration.Port, "certs/cert.pem", "certs/key.pem", handlers.LoggingHandler(os.Stdout, router)).Error())
+		s.Logger.Info("Starting server https://" + s.Configuration.Host + ":" + s.Configuration.Port)
+		s.Logger.Fatal(http.ListenAndServeTLS(":"+s.Configuration.Port, "certs/cert.pem", "certs/key.pem", handlers.LoggingHandler(os.Stdout, router)).Error())
 	}
 
 	if s.Configuration.SSLMode == "production" {
@@ -115,16 +114,16 @@ func (s Setup) HandleRequests() {
 
 		// Launch HTTP server
 		go func() {
-			logger.GetLogger().Info("Starting server http://localhost")
+			s.Logger.Info("Starting server http://localhost")
 
 			err := httpSrv.ListenAndServe()
 			if err != nil {
-				logger.GetLogger().Fatal("httpSrv.ListenAndServe() failed with " + err.Error())
+				s.Logger.Fatal("httpSrv.ListenAndServe() failed with " + err.Error())
 			}
 		}()
 
 		// Launch HTTPS server
-		logger.GetLogger().Info("Starting server https://" + s.Configuration.Host + ":" + s.Configuration.Port)
-		logger.GetLogger().Fatal(httpsSrv.ListenAndServeTLS("", "").Error())
+		s.Logger.Info("Starting server https://" + s.Configuration.Host + ":" + s.Configuration.Port)
+		s.Logger.Fatal(httpsSrv.ListenAndServeTLS("", "").Error())
 	}
 }
