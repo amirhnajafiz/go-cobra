@@ -4,20 +4,24 @@ import (
 	"bytes"
 	"cmd/internal/models"
 	"cmd/pkg/json-check"
-	zap_logger "cmd/pkg/zap-logger"
+	logger "cmd/pkg/zap-logger"
 	"gorm.io/gorm"
 	"os/exec"
 	"regexp"
 	"strconv"
 )
 
-func RunCommand(cmd string, t models.Task, db *gorm.DB) string {
+type Runner struct {
+	DB *gorm.DB
+}
+
+func (r Runner) RunCommand(cmd string, t models.Task) string {
 	pattern := `(--[^\s]+="[^"]+")|"([^"]+)"|'([^']+)'|([^\s]+)`
 	parts := regexp.MustCompile(pattern).FindAllString(cmd, -1)
 
 	//	The first part is the command, the rest are the args:
 	head := parts[0]
-	arguments := parts[1:len(parts)]
+	arguments := parts[1:]
 
 	//	Format the command
 	command := exec.Command(head, arguments...)
@@ -32,7 +36,7 @@ func RunCommand(cmd string, t models.Task, db *gorm.DB) string {
 	err := command.Run()
 
 	if err != nil {
-		zap_logger.GetLogger().Fatal(strconv.Itoa(int(t.ID)) + " command execution fail")
+		logger.GetLogger().Fatal(strconv.Itoa(int(t.ID)) + " command execution fail")
 	}
 
 	t.Status = "Completed"
@@ -42,7 +46,7 @@ func RunCommand(cmd string, t models.Task, db *gorm.DB) string {
 		t.Response = out.String()
 	}
 
-	db.Save(&t)
+	r.DB.Save(&t)
 
 	return out.String()
 }
