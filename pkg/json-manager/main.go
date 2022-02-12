@@ -1,4 +1,4 @@
-package json_check
+package json_manager
 
 import "encoding/json"
 
