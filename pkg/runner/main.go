@@ -3,8 +3,8 @@ package runner
 import (
 	"bytes"
 	"cmd/internal/models"
-	"cmd/pkg/json-manager"
-	logger "cmd/pkg/zap-logger"
+	"cmd/pkg/checker"
+	logger "cmd/pkg/logger"
 	"gorm.io/gorm"
 	"os/exec"
 	"regexp"
@@ -42,7 +42,7 @@ func (r Runner) RunCommand(cmd string, t models.Task) string {
 	t.Status = "Completed"
 
 	// Add results to db if in JSON format
-	if json_manager.IsJSON(out.String()) {
+	if checker.IsJSON(out.String()) {
 		t.Response = out.String()
 	}
 

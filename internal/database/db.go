@@ -2,7 +2,7 @@ package database
 
 import (
 	"cmd/internal/models"
-	logger "cmd/pkg/zap-logger"
+	logger "cmd/pkg/logger"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )

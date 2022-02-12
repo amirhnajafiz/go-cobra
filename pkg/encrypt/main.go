@@ -1,7 +1,7 @@
 package encrypt
 
 import (
-	zap_logger "cmd/pkg/zap-logger"
+	zap_logger "cmd/pkg/logger"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/tls"
