@@ -5,6 +5,7 @@ import (
 	handler2 "cmd/internal/http/handler"
 	"cmd/internal/middleware"
 	"cmd/pkg/encrypt"
+	"cmd/pkg/runner"
 	logger "cmd/pkg/zap-logger"
 	"context"
 	"crypto/tls"
@@ -29,6 +30,9 @@ func (s Setup) HandleRequests() {
 	var m *autocert.Manager
 	handler := handler2.Handler{
 		DB: s.DB,
+		Runner: runner.Runner{
+			DB: s.DB,
+		},
 	}
 	mid := middleware.Middleware{
 		Configuration: s.Configuration,
