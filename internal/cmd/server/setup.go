@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"go.uber.org/zap"
 	"golang.org/x/crypto/acme/autocert"
 	"gorm.io/gorm"
 	"net/http"
@@ -22,6 +23,7 @@ import (
 type Setup struct {
 	Configuration config.Config
 	DB            *gorm.DB
+	Logger        *zap.Logger
 }
 
 func (s Setup) HandleRequests() {

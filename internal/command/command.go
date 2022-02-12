@@ -44,6 +44,7 @@ func (c Commander) ServerCmd() *cobra.Command {
 	set := server.Setup{
 		Configuration: c.Configuration,
 		DB:            c.DB,
+		Logger:        c.Logger,
 	}
 	return &cobra.Command{
 		Use: "server",

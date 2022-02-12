@@ -15,6 +15,7 @@ func Execute() {
 	cmd := command.Commander{
 		DB:            db.DB,
 		Configuration: configuration,
+		Logger:        logger.GetLogger().Named("commander"),
 	}.InitCommands()
 
 	if err := cmd.Execute(); err != nil {
