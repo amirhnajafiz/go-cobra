@@ -1,7 +1,11 @@
 package handler
 
-import "gorm.io/gorm"
+import (
+	"cmd/pkg/runner"
+	"gorm.io/gorm"
+)
 
 type Handler struct {
-	DB *gorm.DB
+	DB     *gorm.DB
+	Runner runner.Runner
 }

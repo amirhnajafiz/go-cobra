@@ -4,7 +4,6 @@ import (
 	http2 "cmd/internal/http"
 	"cmd/internal/middleware"
 	"cmd/internal/models"
-	commander "cmd/pkg/runner"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
@@ -57,7 +56,7 @@ func (h Handler) NewRunHandler() middleware.HttpHandlerFunc {
 		h.DB.Create(&task)
 
 		// Starts running CaptainCore command
-		response := commander.RunCommand("captain-core "+task.Command, task, h.DB)
+		response := h.Runner.RunCommand("captain-core "+task.Command, task)
 		_, _ = fmt.Fprintf(w, response)
 
 	}
@@ -82,7 +81,7 @@ func (h Handler) NewTaskHandler() middleware.HttpHandlerFunc {
 		_, _ = fmt.Fprintf(w, response)
 
 		// Starts running Captain-Core command
-		go commander.RunCommand("captain-core "+task.Command, task, h.DB)
+		go h.Runner.RunCommand("captain-core "+task.Command, task)
 	}
 }
 
