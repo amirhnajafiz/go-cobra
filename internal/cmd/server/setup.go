@@ -40,6 +40,9 @@ func (s Setup) HandleRequests() {
 	mid := middleware.Middleware{
 		Configuration: s.Configuration,
 	}
+	enc := encrypt.Encrypt{
+		Logger: s.Logger.Named("encrypt"),
+	}
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/tasks", mid.Auth(hdl.AllTasksHandler())).Methods("GET")
@@ -54,13 +57,13 @@ func (s Setup) HandleRequests() {
 		// Generate ca.crt and ca.key if not found
 		caFile, err := os.Open("certs/ca.crt")
 		if err != nil {
-			encrypt.GenerateCertificateAuthority()
+			enc.GenerateCertificateAuthority()
 		}
 		defer func(caFile *os.File) {
 			_ = caFile.Close()
 		}(caFile)
 		// Generate cert.pem and key.pem for https://localhost
-		encrypt.GenerateCert()
+		enc.GenerateCert()
 
 		// Launch HTTPS server
 		logger.GetLogger().Info("Starting server https://" + s.Configuration.Host + ":" + s.Configuration.Port)
