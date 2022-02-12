@@ -33,7 +33,8 @@ func (s Setup) HandleRequests() {
 	hdl := handler.Handler{
 		DB: s.DB,
 		Runner: runner.Runner{
-			DB: s.DB,
+			DB:     s.DB,
+			Logger: s.Logger.Named("runner"),
 		},
 	}
 	mid := middleware.Middleware{
