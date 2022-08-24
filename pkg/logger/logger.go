@@ -2,6 +2,6 @@ package logger
 
 import "go.uber.org/zap"
 
-func GetLogger() *zap.Logger {
+func New() *zap.Logger {
 	return zap.NewExample()
 }

@@ -2,12 +2,13 @@ package runner
 
 import (
 	"bytes"
-	"github.com/amirhnajafiz/go-cobra/internal/models"
-	"go.uber.org/zap"
-	"gorm.io/gorm"
 	"os/exec"
 	"regexp"
 	"strconv"
+
+	"github.com/amirhnajafiz/go-cobra/internal/models"
+	"go.uber.org/zap"
+	"gorm.io/gorm"
 )
 
 type Runner struct {
@@ -29,6 +30,7 @@ func (r Runner) RunCommand(cmd string, t models.Task) string {
 	//	Sanity check -- capture stdout and stderr:
 	var out bytes.Buffer
 	var stderr bytes.Buffer
+
 	command.Stdout = &out    // Standard out: out.String()
 	command.Stderr = &stderr // Standard errors: stderr.String()
 
@@ -37,12 +39,11 @@ func (r Runner) RunCommand(cmd string, t models.Task) string {
 
 	if err != nil {
 		r.Logger.Fatal(strconv.Itoa(int(t.ID)) + " command execution fail")
-	}
 
-	t.Status = "Completed"
-
-	// Add results to db if in JSON format
-	if checker.IsJSON(out.String()) {
+		t.Status = "Failed"
+		t.Response = err.Error()
+	} else {
+		t.Status = "Completed"
 		t.Response = out.String()
 	}
 
