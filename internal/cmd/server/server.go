@@ -9,10 +9,11 @@ import (
 	"time"
 
 	"github.com/amirhnajafiz/go-cobra/internal/config"
+	"github.com/amirhnajafiz/go-cobra/internal/database"
 	"github.com/amirhnajafiz/go-cobra/internal/http/handler"
 	"github.com/amirhnajafiz/go-cobra/internal/http/middleware"
 	"github.com/amirhnajafiz/go-cobra/internal/runner"
-	"github.com/amirhnajafiz/go-cobra/pkg/encrypt"
+	"github.com/amirhnajafiz/go-cobra/pkg/logger"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
@@ -26,56 +27,64 @@ type Server struct {
 	Logger        *zap.Logger
 }
 
-func (s Server) serve() {
-	var (
-		httpsSrv *http.Server
-		httpSrv  *http.Server
-		m        *autocert.Manager
-	)
+func main() {
+	l := logger.New()
 
-	hdl := handler.Handler{
-		DB: s.DB,
+	cfg, err := config.LoadConfiguration()
+	if err != nil {
+		panic(err)
+	}
+
+	conn, err := database.Connect()
+	if err != nil {
+		panic(err)
+	}
+
+	h := handler.Handler{
+		DB: conn,
 		Runner: runner.Runner{
-			DB:     s.DB,
-			Logger: s.Logger.Named("runner"),
+			DB:     conn,
+			Logger: l.Named("runner"),
 		},
 	}
 
 	mid := middleware.Middleware{
-		Token: s.Configuration.Token,
-	}
-
-	enc := encrypt.Encrypt{
-		Logger: s.Logger.Named("encrypt"),
+		Token: cfg.Token,
 	}
 
 	router := mux.NewRouter().StrictSlash(true)
 
-	router.HandleFunc("/tasks", mid.Auth(hdl.AllTasks())).Methods("GET")
-	router.HandleFunc("/tasks/{page}", mid.Auth(hdl.AllTasks())).Methods("GET")
-	router.HandleFunc("/run", mid.Auth(hdl.NewRun())).Methods("POST")
-	router.HandleFunc("/tasks", mid.Auth(hdl.NewTask())).Methods("POST")
-	router.HandleFunc("/task/{id}", mid.Auth(hdl.DeleteTask())).Methods("DELETE")
-	router.HandleFunc("/task/{id}", mid.Auth(hdl.ViewTask())).Methods("GET")
-	router.HandleFunc("/task/{id}", mid.Auth(hdl.UpdateTask())).Methods("PUT")
+	router.HandleFunc("/tasks", mid.Auth(h.AllTasks())).Methods("GET")
+	router.HandleFunc("/tasks/{page}", mid.Auth(h.AllTasks())).Methods("GET")
+	router.HandleFunc("/run", mid.Auth(h.NewRun())).Methods("POST")
+	router.HandleFunc("/tasks", mid.Auth(h.NewTask())).Methods("POST")
+	router.HandleFunc("/task/{id}", mid.Auth(h.DeleteTask())).Methods("DELETE")
+	router.HandleFunc("/task/{id}", mid.Auth(h.ViewTask())).Methods("GET")
+	router.HandleFunc("/task/{id}", mid.Auth(h.UpdateTask())).Methods("PUT")
 
+	server := &Server{
+		Configuration: *cfg,
+		DB:            conn,
+		Logger:        l.Named("server"),
+	}
+
+	server.serve(router)
+}
+
+func (s Server) serve(router *mux.Router) {
 	if s.Configuration.SSLMode == "development" {
-		caFile, err := os.Open("certs/ca.crt")
-		if err != nil {
-			enc.GenerateCertificateAuthority()
-		}
-		defer func(caFile *os.File) {
-			_ = caFile.Close()
-		}(caFile)
-		enc.GenerateCert()
-
-		// Launch HTTPS server
 		s.Logger.Info("Starting server https://" + s.Configuration.Host + ":" + s.Configuration.Port)
-		s.Logger.Fatal(http.ListenAndServeTLS(":"+s.Configuration.Port, "certs/cert.pem", "certs/key.pem", handlers.LoggingHandler(os.Stdout, router)).Error())
+		s.Logger.Fatal(
+			http.ListenAndServeTLS(
+				":"+s.Configuration.Port,
+				"certs/cert.pem",
+				"certs/key.pem",
+				handlers.LoggingHandler(os.Stdout, router)).Error(),
+		)
 	}
 
 	if s.Configuration.SSLMode == "production" {
-		httpsSrv = &http.Server{
+		httpsSrv := &http.Server{
 			ReadTimeout:  5 * time.Second,
 			WriteTimeout: 5 * time.Second,
 			IdleTimeout:  120 * time.Second,
@@ -92,7 +101,7 @@ func (s Server) serve() {
 			return fmt.Errorf("acme/autocert: only %s host is allowed", allowedHost)
 		}
 
-		m = &autocert.Manager{
+		m := &autocert.Manager{
 			Prompt:     autocert.AcceptTOS,
 			HostPolicy: hostPolicy,
 			Cache:      autocert.DirCache(dataDir),
@@ -101,8 +110,7 @@ func (s Server) serve() {
 		httpsSrv.Addr = s.Configuration.Host + ":443"
 		httpsSrv.TLSConfig = &tls.Config{GetCertificate: m.GetCertificate}
 
-		// Spin up web server on port 80 to listen for auto-cert HTTP challenge
-		httpSrv = &http.Server{
+		httpSrv := &http.Server{
 			Addr:         ":8080",
 			ReadTimeout:  5 * time.Second,
 			WriteTimeout: 5 * time.Second,
@@ -110,13 +118,10 @@ func (s Server) serve() {
 			Handler:      &http.ServeMux{},
 		}
 
-		// allow auto-cert handle Let's Encrypt auth callbacks over HTTP.
 		if m != nil {
-			// https://github.com/golang/go/issues/21890
 			httpSrv.Handler = m.HTTPHandler(httpSrv.Handler)
 		}
 
-		// Launch HTTP server
 		go func() {
 			s.Logger.Info("Starting server http://localhost")
 
@@ -126,7 +131,6 @@ func (s Server) serve() {
 			}
 		}()
 
-		// Launch HTTPS server
 		s.Logger.Info("Starting server https://" + s.Configuration.Host + ":" + s.Configuration.Port)
 		s.Logger.Fatal(httpsSrv.ListenAndServeTLS("", "").Error())
 	}
