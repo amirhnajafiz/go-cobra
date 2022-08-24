@@ -1,7 +1,7 @@
 package database
 
 import (
-	"cmd/internal/models"
+	"github.com/amirhnajafiz/go-cobra/internal/models"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )

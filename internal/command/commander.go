@@ -1,7 +1,7 @@
 package command
 
 import (
-	"cmd/internal/config"
+	"github.com/amirhnajafiz/go-cobra/internal/config"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )

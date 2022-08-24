@@ -1,14 +1,14 @@
 package server
 
 import (
-	"cmd/internal/config"
-	"cmd/internal/http/handler"
-	"cmd/internal/middleware"
-	"cmd/pkg/encrypt"
-	"cmd/pkg/runner"
 	"context"
 	"crypto/tls"
 	"fmt"
+	"github.com/amirhnajafiz/go-cobra/internal/config"
+	"github.com/amirhnajafiz/go-cobra/internal/http/handler"
+	"github.com/amirhnajafiz/go-cobra/internal/middleware"
+	"github.com/amirhnajafiz/go-cobra/pkg/encrypt"
+	"github.com/amirhnajafiz/go-cobra/pkg/runner"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"

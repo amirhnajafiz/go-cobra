@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"cmd/internal/config"
+	"github.com/amirhnajafiz/go-cobra/internal/config"
 	"net/http"
 )
 

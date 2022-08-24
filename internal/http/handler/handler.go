@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"cmd/pkg/runner"
+	"github.com/amirhnajafiz/go-cobra/pkg/runner"
 	"gorm.io/gorm"
 )
 

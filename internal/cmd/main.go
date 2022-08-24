@@ -1,11 +1,12 @@
 package cmd
 
 import (
-	"cmd/internal/command"
-	"cmd/internal/config"
-	"cmd/internal/database"
-	"cmd/pkg/logger"
 	"os"
+
+	"github.com/amirhnajafiz/go-cobra/internal/command"
+	"github.com/amirhnajafiz/go-cobra/internal/config"
+	"github.com/amirhnajafiz/go-cobra/internal/database"
+	"github.com/amirhnajafiz/go-cobra/pkg/logger"
 )
 
 // Execute will setup database, configurations and cobra

@@ -1,7 +1,7 @@
 package command
 
 import (
-	"cmd/internal/cmd/server"
+	"github.com/amirhnajafiz/go-cobra/internal/cmd/server"
 	"github.com/spf13/cobra"
 )
 

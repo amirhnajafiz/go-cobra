@@ -1,11 +1,11 @@
 package handler
 
 import (
-	http2 "cmd/internal/http"
-	"cmd/internal/middleware"
-	"cmd/internal/models"
 	"encoding/json"
 	"fmt"
+	http2 "github.com/amirhnajafiz/go-cobra/internal/http"
+	"github.com/amirhnajafiz/go-cobra/internal/middleware"
+	"github.com/amirhnajafiz/go-cobra/internal/models"
 	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"

@@ -1,4 +1,4 @@
-module cmd
+module github.com/amirhnajafiz/go-cobra
 
 go 1.17
 

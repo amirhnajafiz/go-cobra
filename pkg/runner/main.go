@@ -2,8 +2,8 @@ package runner
 
 import (
 	"bytes"
-	"cmd/internal/models"
-	"cmd/pkg/checker"
+	"github.com/amirhnajafiz/go-cobra/internal/models"
+	"github.com/amirhnajafiz/go-cobra/pkg/checker"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"os/exec"
