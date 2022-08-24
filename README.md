@@ -1,35 +1,80 @@
-# Web CLI
+<p align="center">
+  <img src="assets/logo.png" alt="logo" />
+</p>
 
-## What is this project?
-Building a **Dispatching Server** using Golang programming language
-and Golang Cobra package. 
+<h1 align="center">
+Go Cobra
+</h1>
 
-You can create a command in a task and send it to the main sever, 
-the server will execute that command for you by using a **Runner**. 
+Building a **Dispatching Server** using _Golang_ programming language
+and Golang _Cobra_ package with _tls_ license and _Sqlite_ database. The
+main idea of this project is to learn _Cobra_ package and working
+with _tls_ license.
 
 In this application you can create a task then you can run it
 or change it or delete it. You can also see the list of the tasks
 and their status.
 
-## What is a Dispatching server?
-The Web Dispatcher is the entry point for all external HTTP requests 
-and the interface between all HTTP clients and the SAP system. 
-The Web Dispatcher can work as load balancer for incoming requests 
-which are distributed among all available application servers.
+## What do you learn from this project?
+- Golang Cobra
+- TLS certification
+- Sqlite
 
-## Why using Cobra?
+## What is Cobra?
 Cobra is a powerful library and tool in Golang that is used to
 create CLI (Command-Line Interface) applications. 
 Cobra does this by providing tools that automate
 the process and provide key abstractions that increase
 developer productivity.
 
-## What are the project routes?
+Read more about [Cobra](https://cobra.dev/).
+
+List of project commands:
+- ```serve```: starting dispatching server
+- ```migrate```: migrating database
+- ```crypto```: generate certification files
+
+## TLS certification
+Transport Layer Security (TLS) 
+certificates—most commonly known as SSL, 
+or digital certificates—are the foundation 
+of a safe and secure internet. 
+
+TLS/SSL certificates secure internet 
+connections by encrypting data sent between 
+your browser, the website you’re visiting, 
+and the website server. 
+They ensure that data is transmitted privately 
+and without modifications, loss or theft.
+
+Read more about [TLS](https://www.digicert.com/tls-ssl/tls-ssl-certificates#:~:text=Transport%20Layer%20Security%20(TLS)%20certificates,visiting%2C%20and%20the%20website%20server.).
+
+## How to use project?
+Clone the repository and enter into main directory.
+
+### TLS files
+You can create new TLS files:
+```shell
+go run main.go crypto
+```
+
+### Database migration
+To create a SQLite database:
+```shell
+go run main.go migrate
+```
+
+### Dispatching server
+Start server:
+```shell
+go run main.go serve
+```
+
 - `/tasks/{page?}` GET
   - page argument is optional 
-  - returns a list of tags
+  - returns a list of tasks
 - `/run` POST
-  - running a task command
+  - run a task command
 - `/tasks` POST 
   - creating a new task command
 - `/task/{id}` DELETE
@@ -38,28 +83,3 @@ developer productivity.
   - returns a task status
 - `/task/{id}` PUT
   - updates an existing task
-
-## How to run the project?
-After cloning the project:
-```shell
-git clone https://github.com/amirhnajafiz/Web-CLI.git
-cd Web-CLI
-```
-
-Run the project:
-```shell
-make serve
-```
-
-If you need a guid, run:
-```shell
-make dispatch
-```
-
-## Project dependencies
-- go 1.17
-- cobra v1.3.0
-- mux v1.8.0
-- sqlite v1.2.6
-- crypto v0
-- ozzo-validation v3
