@@ -10,7 +10,13 @@ import (
 	"math/big"
 	"os"
 	"time"
+
+	"go.uber.org/zap"
 )
+
+type Encrypt struct {
+	Logger *zap.Logger
+}
 
 func (e Encrypt) GenerateCertificateAuthority() {
 	ca := &x509.Certificate{
@@ -32,25 +38,30 @@ func (e Encrypt) GenerateCertificateAuthority() {
 	}
 
 	privacy, _ := rsa.GenerateKey(rand.Reader, 2048)
-	pub := &privacy.PublicKey
-	caB, err := x509.CreateCertificate(rand.Reader, ca, ca, pub, privacy)
+
+	caB, err := x509.CreateCertificate(rand.Reader, ca, ca, &privacy.PublicKey, privacy)
 	if err != nil {
 		e.Logger.Error("create ca failed : " + err.Error())
+
 		return
 	}
 
 	_ = os.Mkdir("certs", 0600)
 
 	// Public key
-	certOut, err := os.Create("certs/ca.crt")
+	certOut, _ := os.Create("certs/ca.crt")
+
 	_ = pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: caB})
 	_ = certOut.Close()
+
 	e.Logger.Info("written certs/cat.crt\n")
 
 	// Private key
-	keyOut, err := os.OpenFile("certs/ca.key", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	keyOut, _ := os.OpenFile("certs/ca.key", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+
 	_ = pem.Encode(keyOut, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(privacy)})
 	_ = keyOut.Close()
+
 	e.Logger.Info("written certs/ca.key\n")
 }
 
@@ -60,6 +71,7 @@ func (e Encrypt) GenerateCert() {
 	if err != nil {
 		e.Logger.Panic(err.Error())
 	}
+
 	ca, err := x509.ParseCertificate(cults.Certificate[0])
 	if err != nil {
 		e.Logger.Panic(err.Error())
@@ -87,20 +99,23 @@ func (e Encrypt) GenerateCert() {
 	}
 
 	privy, _ := rsa.GenerateKey(rand.Reader, 2048)
-	pub := &privy.PublicKey
 
 	// Sign the certificate
-	certB, err := x509.CreateCertificate(rand.Reader, cert, ca, pub, cults.PrivateKey)
+	certB, err := x509.CreateCertificate(rand.Reader, cert, ca, &privy.PublicKey, cults.PrivateKey)
 
 	// Public key
 	certOut, err := os.Create("certs/cert.pem")
+
 	_ = pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: certB})
 	_ = certOut.Close()
+
 	e.Logger.Info("written certs/cert.pem\n")
 
 	// Private key
 	keyOut, err := os.OpenFile("certs/key.pem", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+
 	_ = pem.Encode(keyOut, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(privy)})
 	_ = keyOut.Close()
+
 	e.Logger.Info("written certs/key.pem\n")
 }
