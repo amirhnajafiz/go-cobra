@@ -16,6 +16,7 @@ import (
 	"github.com/amirhnajafiz/go-cobra/pkg/logger"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/acme/autocert"
 	"gorm.io/gorm"
@@ -25,6 +26,17 @@ type Server struct {
 	Configuration config.Config
 	DB            *gorm.DB
 	Logger        *zap.Logger
+}
+
+func GetCommand() *cobra.Command {
+	return &cobra.Command{
+		Use:   "serve",
+		Short: "server",
+		Long:  "start dispatching server",
+		Run: func(_ *cobra.Command, _ []string) {
+			main()
+		},
+	}
 }
 
 func main() {
