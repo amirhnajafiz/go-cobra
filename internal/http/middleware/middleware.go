@@ -1,12 +1,14 @@
 package middleware
 
 import (
-	"github.com/amirhnajafiz/go-cobra/internal/config"
 	"net/http"
+
+	"go.uber.org/zap"
 )
 
 type HttpHandlerFunc func(http.ResponseWriter, *http.Request)
 
 type Middleware struct {
-	Configuration config.Config
+	Logger *zap.Logger
+	Token  string
 }
